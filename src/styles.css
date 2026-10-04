@@ -1,0 +1,277 @@
+/* Colors and spacing used across the page */
+:root {
+  --color-text: #1f2933;
+  --color-muted: #52606d;
+  --color-background: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-border: #d3dae3;
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-selected-bg: #eff4ff;
+  --color-success: #1a7f37;
+  --color-success-bg: #e8f5ec;
+  --color-warning: #8a5a00;
+  --color-warning-bg: #fff4d6;
+  --color-error: #c62828;
+  --color-error-bg: #fdecea;
+  --color-disabled: #8a96a3;
+  --color-disabled-bg: #eef1f4;
+  --radius: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.page-header h1 {
+  margin: 0 0 4px;
+}
+
+.page-header p {
+  margin: 0 0 24px;
+  color: var(--color-muted);
+}
+
+/* Each numbered step is a card */
+.step {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.step h2 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+}
+
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+legend {
+  padding: 0;
+}
+
+.hint {
+  margin: 0 0 12px;
+  color: var(--color-muted);
+  font-size: 0.95rem;
+}
+
+/* Selectable class/session options (radio buttons styled as cards) */
+.option-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  background: var(--color-surface);
+}
+
+.option:hover {
+  border-color: var(--color-primary);
+}
+
+.option.is-selected {
+  border-color: var(--color-primary);
+  background: var(--color-selected-bg);
+}
+
+.option.is-disabled {
+  cursor: not-allowed;
+  color: var(--color-disabled);
+  background: var(--color-disabled-bg);
+  border-color: var(--color-border);
+}
+
+.option input {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.option-text {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.option-title {
+  font-weight: 600;
+}
+
+.option-detail {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.option.is-disabled .option-detail {
+  color: var(--color-disabled);
+}
+
+/* Availability badges on sessions */
+.badge {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge-available {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+}
+
+.badge-few {
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
+}
+
+.badge-full {
+  color: var(--color-muted);
+  background: var(--color-border);
+}
+
+/* Participants field */
+label[for="participants"] {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+#participants {
+  width: 120px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+}
+
+#participants:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+#participants.is-invalid {
+  border-color: var(--color-error);
+}
+
+.field-error {
+  margin: 0;
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+/* Summary and confirmation details */
+.details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0 0 16px;
+}
+
+.details dt {
+  color: var(--color-muted);
+}
+
+.details dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.validation {
+  margin-bottom: 16px;
+}
+
+.validation-title {
+  margin: 0 0 4px;
+  color: var(--color-error);
+  font-weight: 600;
+}
+
+.validation ul {
+  margin: 0;
+  padding: 10px 10px 10px 28px;
+  background: var(--color-error-bg);
+  border-radius: var(--radius);
+  color: var(--color-error);
+}
+
+.ready {
+  margin: 0;
+  padding: 10px;
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border-radius: var(--radius);
+}
+
+/* Buttons */
+.primary-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--color-primary);
+  border: 0;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: var(--color-primary-dark);
+}
+
+.primary-button:disabled {
+  background: var(--color-disabled);
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Confirmation view */
+.confirmation {
+  border-color: var(--color-success);
+}
+
+.confirmation h2 {
+  color: var(--color-success);
+}
+
+.confirmation h2:focus {
+  outline: none;
+}
+
+[hidden] {
+  display: none !important;
+}

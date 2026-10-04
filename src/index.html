@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gym Class Reservation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <h1>Gym Class Reservation</h1>
+      <p>Reserve places in a group exercise class. No account or personal details needed.</p>
+    </header>
+
+    <div id="reservation-form">
+      <section class="step">
+        <fieldset>
+          <legend><h2>1. Choose a class</h2></legend>
+          <div id="class-list" class="option-list"></div>
+        </fieldset>
+      </section>
+
+      <section class="step">
+        <fieldset>
+          <legend><h2>2. Choose a session</h2></legend>
+          <p id="session-hint" class="hint"></p>
+          <div id="session-list" class="option-list"></div>
+        </fieldset>
+      </section>
+
+      <section class="step">
+        <h2>3. Number of participants</h2>
+        <label for="participants">Participants</label>
+        <input type="number" id="participants" min="1" step="1" inputmode="numeric"
+               aria-describedby="participants-hint participants-error">
+        <p id="participants-hint" class="hint"></p>
+        <p id="participants-error" class="field-error" hidden></p>
+      </section>
+
+      <section class="step summary">
+        <h2>4. Review your reservation</h2>
+        <dl id="summary-details" class="details"></dl>
+        <div id="validation-messages" class="validation" aria-live="polite"></div>
+        <button type="button" id="confirm-button" class="primary-button">Confirm reservation</button>
+      </section>
+    </div>
+
+    <section id="confirmation" class="step confirmation" hidden>
+      <h2 id="confirmation-heading" tabindex="-1">Reservation confirmed</h2>
+      <p>Your places have been reserved. Here is what you booked:</p>
+      <dl id="confirmation-details" class="details"></dl>
+      <button type="button" id="start-another-button" class="primary-button">Start another reservation</button>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="reservation.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

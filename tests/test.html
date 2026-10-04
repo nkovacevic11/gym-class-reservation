@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gym Class Reservation — Tests</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem; color: #1f2933; }
+    .pass { color: #1a7f37; }
+    .fail { color: #c62828; font-weight: bold; }
+    #summary { font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem; }
+    li { margin: 0.2rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Gym Class Reservation — automated checks</h1>
+  <p>Open this file in a browser. Each line is one check against REQUIREMENTS.md.</p>
+  <div id="summary"></div>
+  <ul id="results"></ul>
+
+  <script src="../src/data.js"></script>
+  <script src="../src/reservation.js"></script>
+  <script>
+    const results = [];
+
+    function check(name, condition) {
+      results.push({ name: name, passed: Boolean(condition) });
+    }
+
+    // Helper: a state with a selection on fresh availability.
+    function makeState(classId, sessionId, participants) {
+      return {
+        availability: createInitialAvailability(),
+        selectedClassId: classId,
+        selectedSessionId: sessionId,
+        participants: participants
+      };
+    }
+
+    // --- Seed data (§3, §4) ---
+    const expectedPrices = { yoga: 8, pilates: 10, functional: 12, spinning: 11 };
+    check("There are exactly 4 classes", GYM_CLASSES.length === 4);
+    GYM_CLASSES.forEach(function (gymClass) {
+      check(gymClass.name + " costs " + formatPrice(expectedPrices[gymClass.id]),
+        gymClass.pricePerParticipant === expectedPrices[gymClass.id]);
+      check(gymClass.name + " has 3 sessions", gymClass.sessions.length === 3);
+    });
+
+    const expectedAvailability = {
+      "yoga-mon-1800": 10, "yoga-wed-1900": 6, "yoga-sat-1000": 2,
+      "pilates-tue-1800": 8, "pilates-thu-1900": 4, "pilates-sat-1130": 0,
+      "functional-mon-1930": 5, "functional-wed-1800": 10, "functional-fri-1830": 3,
+      "spinning-tue-1930": 7, "spinning-thu-1800": 1, "spinning-sun-1000": 10
+    };
+    const initial = createInitialAvailability();
+    Object.keys(expectedAvailability).forEach(function (sessionId) {
+      check("Initial availability of " + sessionId + " is " + expectedAvailability[sessionId],
+        initial[sessionId] === expectedAvailability[sessionId]);
+    });
+    check("No session exceeds max capacity of 10", Object.values(initial).every(function (n) {
+      return n <= MAX_CAPACITY;
+    }));
+
+    // --- Price (§9) ---
+    check("Total = participants × price (3 × €12 = €36)", calculateTotal(3, 12) === 36);
+    check("Price is formatted as €8", formatPrice(8) === "€8");
+
+    // --- Participant parsing ---
+    check("'4' parses to 4", parseParticipants("4") === 4);
+    check("' 2 ' parses to 2", parseParticipants(" 2 ") === 2);
+    check("Empty input is not a number", parseParticipants("") === null);
+    check("'2.5' is not a whole number", parseParticipants("2.5") === null);
+    check("'abc' is not a number", parseParticipants("abc") === null);
+
+    // --- Validation (§8, §14) ---
+    check("No class selected is invalid",
+      validateReservation(makeState(null, null, "1")).includes("Please choose a class."));
+    check("No session selected is invalid",
+      validateReservation(makeState("yoga", null, "1")).includes("Please choose a session."));
+    check("Session from another class is treated as not selected",
+      validateReservation(makeState("pilates", "yoga-mon-1800", "1")).includes("Please choose a session."));
+    check("1 participant is valid",
+      validateReservation(makeState("yoga", "yoga-wed-1900", "1")).length === 0);
+    check("Maximum remaining (6) is valid",
+      validateReservation(makeState("yoga", "yoga-wed-1900", "6")).length === 0);
+    check("Remaining + 1 (7) is invalid",
+      validateReservation(makeState("yoga", "yoga-wed-1900", "7")).includes("Only 6 places remain in this session."));
+    check("Session with 1 place accepts exactly 1",
+      validateReservation(makeState("spinning", "spinning-thu-1800", "1")).length === 0);
+    check("Session with 1 place rejects 2",
+      validateReservation(makeState("spinning", "spinning-thu-1800", "2")).includes("Only 1 place remains in this session."));
+    check("0 participants is invalid",
+      validateReservation(makeState("yoga", "yoga-wed-1900", "0")).includes("At least 1 participant is required."));
+    check("-1 participants is invalid",
+      validateReservation(makeState("yoga", "yoga-wed-1900", "-1")).includes("At least 1 participant is required."));
+    check("Empty participants is invalid",
+      validateReservation(makeState("yoga", "yoga-wed-1900", "")).includes("Enter a whole number of participants."));
+    check("Full session (Pilates Saturday 11:30) is invalid",
+      validateReservation(makeState("pilates", "pilates-sat-1130", "1"))
+        .includes("This session is full. Please choose another session."));
+    check("Full session is reported as full", isFull(initial, "pilates-sat-1130"));
+    check("Participant check: 4 of 4 remaining is valid", validateParticipants("4", 4) === null);
+    check("Participant check: 5 of 4 remaining is invalid",
+      validateParticipants("5", 4) === "Only 4 places remain in this session.");
+    check("Participant check: '2.5' is invalid",
+      validateParticipants("2.5", 4) === "Enter a whole number of participants.");
+
+    // --- Confirmation and availability (§12, §13) ---
+    const state = makeState("yoga", "yoga-wed-1900", "2");
+    const result = confirmReservation(state);
+    check("Valid reservation is confirmed", result.ok === true);
+    check("6 places − 2 participants leaves 4 (BRD §12 example)", result.availability["yoga-wed-1900"] === 4);
+    check("Other sessions are unchanged", result.availability["yoga-mon-1800"] === 10);
+    check("Original state is not modified", state.availability["yoga-wed-1900"] === 6);
+    check("Confirmation snapshot has the total €16", result.reservation.total === 16);
+    check("Confirmation snapshot has remaining places", result.reservation.remainingAfter === 4);
+
+    const second = confirmReservation({
+      availability: result.availability,
+      selectedClassId: "yoga",
+      selectedSessionId: "yoga-wed-1900",
+      participants: "4"
+    });
+    check("Second reservation of 4 uses the reduced availability", second.ok && second.availability["yoga-wed-1900"] === 0);
+    check("Session is full after reserving all places", isFull(second.availability, "yoga-wed-1900"));
+
+    const rejected = confirmReservation(makeState("yoga", "yoga-sat-1000", "3"));
+    check("Invalid reservation is refused", rejected.ok === false && rejected.errors.length > 0);
+
+    check("Re-initialising restores BRD availability (refresh)",
+      createInitialAvailability()["yoga-wed-1900"] === 6);
+
+    // --- Output ---
+    const list = document.getElementById("results");
+    results.forEach(function (r) {
+      const item = document.createElement("li");
+      item.className = r.passed ? "pass" : "fail";
+      item.textContent = (r.passed ? "PASS — " : "FAIL — ") + r.name;
+      list.appendChild(item);
+    });
+    const failed = results.filter(function (r) { return !r.passed; }).length;
+    const summary = document.getElementById("summary");
+    summary.className = failed === 0 ? "pass" : "fail";
+    summary.textContent = (results.length - failed) + " / " + results.length + " checks passed";
+  </script>
+</body>
+</html>

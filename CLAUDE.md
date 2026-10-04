@@ -4,9 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-Early stage. `src/index.html`, `src/app.js` and `src/styles.css` exist but are empty. The README mentions a `tests/` directory, but it hasn't been created yet. There is no package manager, build step, linter or test runner yet. Once one is added, document its commands here instead of guessing them.
+A static, client-side web app (plain HTML/CSS/vanilla JS). There is no package manager, build step or linter, and Node.js is not installed.
 
-The intended shape is a static, client-side web app (plain HTML/CSS/JS) that you open in a browser via `src/index.html`.
+- **Run the app:** open `src/index.html` in a browser (double-clicking it works).
+- **Run the automated tests:** open `tests/test.html` in a browser. It shows "N / N checks passed". Headless alternative: `msedge --headless --dump-dom file:///<path>/tests/test.html` and look for the summary line.
+- **Manual tests:** `tests/test-cases.md` lists the BRD scenarios (TC-xx) to click through.
+
+## Code structure
+
+Scripts are classic `<script>` tags, not ES modules (modules don't load from `file://`). They share globals and must load in this order: `data.js` → `reservation.js` → `app.js`.
+
+- `src/data.js`: the BRD seed data (`GYM_CLASSES`, `MAX_CAPACITY`). The only place where classes, prices and sessions are defined.
+- `src/reservation.js`: pure business rules (availability, parsing, validation, total, confirm). No DOM access. This is what `tests/test.html` tests.
+- `src/app.js`: holds the in-memory `state`. Event handlers update `state` and then call `render()`, which redraws the page from `state`.
+- `src/styles.css`: all styling.
 
 ## Project rules (from README)
 
